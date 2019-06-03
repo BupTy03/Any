@@ -16,7 +16,13 @@ struct any
 	{
 		constexpr auto st_type = (use_internal_storage<T>::value) ? storage_type::INTERNAL : storage_type::EXTERNAL;
 		storage_operator_ = &(storage_operator<T, st_type>::do_things);
-		storage_strategy<T, st_type>::construct(storage_, std::forward<T>(val));
+		try {
+			storage_strategy<T, st_type>::construct(storage_, std::forward<T>(val));
+		}
+		catch (const std::exception& exc) {
+			storage_strategy<T, st_type>::destroy(storage_);
+			throw exc;
+		}
 	}
 
 	~any() { reset(); }
@@ -51,7 +57,7 @@ struct any
 		constexpr auto st_type = (use_internal_storage<T>::value) ? storage_type::INTERNAL : storage_type::EXTERNAL;
 		storage_operator_ = &(storage_operator<T, st_type>::do_things);
 		try {
-			storage_operator_(storage_strategy<T, st_type>::construct(storage_, std::forward<Args>(args)...));
+			storage_operator_(storage_strategy<T, st_type>::construct_inplace(storage_, std::forward<Args>(args)...));
 		}
 		catch (const std::exception& exc) {
 			reset();
@@ -139,6 +145,7 @@ private:
 	template<class T>
 	using use_internal_storage = std::bool_constant
 	<
+		std::is_nothrow_move_constructible_v<T> &&
 		(sizeof(T) <= sizeof(storage)) &&
 		(alignof(storage) % alignof(T) == 0)
 	>;
