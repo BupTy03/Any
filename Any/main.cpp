@@ -21,7 +21,7 @@ void print(const any& val)
 
 int main()
 {
-	auto a = any::make<int>(23);
+	any a(23);
 
 	any b{ std::move(a) };
 	print<int>(b);
@@ -30,7 +30,9 @@ int main()
 	print<int>(c);
 
 	any d{ std::string{"string"} };
-	any e = std::move(d);
+	print<std::string>(d);
+
+	any e{ std::move(d) };
 	print<std::string>(e);
 
 	return 0;
