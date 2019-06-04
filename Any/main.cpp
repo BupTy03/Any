@@ -1,10 +1,12 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <functional>
 
 #include "any.hpp"
 
 template<class T>
-void print(const any& val)
+void print_as(const any& val)
 {
 	using std::cout;
 	using std::endl;
@@ -19,21 +21,39 @@ void print(const any& val)
 	}
 }
 
+void print(const any& val)
+{
+	auto&& typeId = val.type();
+	if (typeId == typeid(int)) {
+		print_as<int>(val);
+	}
+	else if (typeId == typeid(char)) {
+		print_as<char>(val);
+	}
+	else if (typeId == typeid(bool)) {
+		print_as<bool>(val);
+	}
+	else if (typeId == typeid(std::string)) {
+		print_as<std::string>(val);
+	}
+	else {
+		std::cout << "Unknown type!\n";
+	}
+}
+
 int main()
 {
-	any a(23);
+	std::vector<any> vec;
+	vec.emplace_back(1);
+	vec.emplace_back(true);
+	vec.emplace_back('c');
+	vec.emplace_back(std::string("string"));
 
-	any b{ std::move(a) };
-	print<int>(b);
+	std::cout << std::boolalpha;
 
-	any c = b;
-	print<int>(c);
-
-	any d{ std::string{"string"} };
-	print<std::string>(d);
-
-	any e{ std::move(d) };
-	print<std::string>(e);
+	for (auto&& val : vec) {
+		print(val);
+	}
 
 	return 0;
 }

@@ -96,7 +96,7 @@ struct any
 		}
 		else if (has_value() && !other.has_value()) {
 			std::swap(storage_operator_, other.storage_operator_);
-			storage_operator_(storage_operation::MOVE, *this, &other);
+			other.storage_operator_(storage_operation::MOVE, *this, &other);
 		}
 	}
 
